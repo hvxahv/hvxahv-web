@@ -1,7 +1,10 @@
 self.addEventListener('push', event => {
-  const title = 'Subscription';
+  const data = event.data.json()
+  const title = data.title;
   const options = {
-    body: "You have successfully subscribed to the notification!",
+    body: data.body,
+    tag: data.tag,
+    icon: data.icon,
     timestamp: new Date().getTime(),
   };
 
