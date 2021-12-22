@@ -8,20 +8,9 @@ const Notifications: NextComponentType = () => {
         navigator.serviceWorker.register('/service-worker.js').then(r => {
           console.log(r)
         }).then(() => {
-          const requestOptions: RequestInit = {
-            method: 'GET',
-            redirect: 'follow'
-          };
-
-          fetch("http://localhost:8100/notify/vapid", requestOptions)
-            .then(res => res.json())
-            .then(res => {
-              console.log(res)
-              localStorage.setItem("vapid_private_key", res.VAPIDPrivateKey)
-              localStorage.setItem("vapid_public_key", res.VAPIDPublicKey)
-              subscription(res.VAPIDPublicKey)
-            })
-            .catch(error => console.log('error', error));
+          const vapidKey: string | null = localStorage.getItem("hvxahv_device_vapid_publicKey")
+          if (vapidKey != null)
+          subscription(vapidKey)
         })
       })
     }
@@ -56,18 +45,24 @@ const Notifications: NextComponentType = () => {
         console.log(subscription.toJSON())
 
         const data = new FormData()
+        const myHeaders = new Headers();
+        // @ts-ignore
+        myHeaders.append("Authorization", `Bearer ${localStorage.getItem("hvxahv_login_token")}`);
         const {endpoint, keys: {auth, p256dh}}: any | undefined = subscription.toJSON()
+        // @ts-ignore
+        data.append("device_id", localStorage.getItem("hvxahv_device_id"))
         data.append("endpoint", endpoint)
         data.append("auth", auth)
         data.append("p256dh", p256dh)
 
         const requestOptions: RequestInit = {
           method: 'POST',
+          headers: myHeaders,
           body: data,
           redirect: 'follow'
         };
 
-        fetch("http://localhost:8100/notify/sub", requestOptions)
+        fetch("http://localhost:8088/api/v1/notify/sub", requestOptions)
           .then(response => response.json())
           .then(result => console.log(result))
           .catch(error => console.log('error', error));

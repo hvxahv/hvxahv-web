@@ -1,0 +1,48 @@
+@import "variables";
+
+input {
+  padding: .6rem;
+  margin: .34rem 0;
+  border: 0.2rem solid $ColdColor;
+  border-radius: .6rem;
+  width: 25rem;
+  outline: none;
+  font-family: $CodeFont;
+
+  &:focus {
+    box-shadow: 0 0 0 0.1rem #f2a7ad;
+    border: 0.2rem solid #8c564a;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+  }
+}
+
+button {
+  outline: none;
+  cursor: pointer;
+  padding: .6rem 1rem;
+  border-radius: .6rem;
+  border: .153rem solid $ColdColor;
+  color: $ColdColor;
+  font-family: $BaseFont;
+
+  &:active {
+    border: .153rem solid #8c564a;
+    box-shadow: 0 0 0 0.153rem #f2a7ad;
+  }
+}
+
+
+textarea {
+  padding: .6rem;
+  margin: .34rem 0;
+  border: 0.2rem solid $ColdColor;
+  border-radius: .6rem;
+  width: 25rem;
+  outline: none;
+  font-family: $CodeFont;
+
+  &:focus {
+    box-shadow: 0 0 0 0.1rem #f2a7ad;
+    border: 0.2rem solid #8c564a;
+  }
+}

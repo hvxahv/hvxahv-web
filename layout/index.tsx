@@ -1,13 +1,9 @@
+import Header from "./header";
 
 const Layout = ({children}: any) => {
     return (
         <>
-          <header>
-            <ul>
-              <li>1</li>
-              <li>2</li>
-            </ul>
-          </header>
+          <Header />
           <div style={{ margin: `1rem`}}>
             {children}
           </div>
