@@ -1,14 +1,14 @@
 import Head from 'next/head'
 import React, {useState, useEffect} from "react";
 import GoBack from "../../components/buttons/back";
-import styles from "./accounts.module.scss";
-import process from "../../next.config";
 import {useRouter} from "next/router";
+import useGeneratorRSAKey from '../../components/rsa/generation';
 
 
 const SignUp = () => {
-
     const { locale } = useRouter()
+
+    const publicKey = useGeneratorRSAKey()
 
     const [username, setUsername] = useState("hvturingga")
     const [password, setPassword] = useState("hvxahv123")
@@ -20,24 +20,23 @@ const SignUp = () => {
         data.append("mail", mail)
         data.append("username", username);
         data.append("password", password);
+        data.append("publicKey", publicKey)
 
-        const requestOptions = {
+        const requestOptions: Request = {
             method: 'POST',
-            body: data,
+            // @ts-ignore
+            body: data as FormData,
             redirect: 'follow'
         };
 
-        // @ts-ignore
         fetch(`${process.env.address}/accounts/signup`, requestOptions)
             .then(res => res.json())
             .then(res => {
-                console.log(res)
-                localStorage.setItem("hvxahv_privateKey", res.privateKey)
-                // setMessage(res)
+                setMessage(res)
             })
             .catch(err => console.log('error', err));
     }
-
+    console.log(message)
     return (
         <div>
             <Head>
