@@ -5,7 +5,7 @@ import styles from './accounts.module.scss'
 import GoBack from "../../components/buttons/back";
 import process from "../../next.config";
 
-const SignIn = () => {
+const Signin = () => {
     const { locale } = useRouter()
 
     const router = useRouter()
@@ -81,4 +81,4 @@ const SignIn = () => {
     )
 }
 
-export default SignIn
+export default Signin

@@ -1,5 +1,5 @@
 import type {NextComponentType} from 'next'
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 
 const Notifications: NextComponentType = () => {
   useEffect(() => {

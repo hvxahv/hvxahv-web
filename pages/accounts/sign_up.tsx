@@ -2,10 +2,10 @@ import Head from 'next/head'
 import React, {useState, useEffect} from "react";
 import GoBack from "../../components/buttons/back";
 import {useRouter} from "next/router";
-import useGeneratorRSAKey from '../../components/rsa/generation';
+import useGeneratorRSAKey from '../../components/crypto/generation';
 
 
-const SignUp = () => {
+const Sign_up = () => {
     const { locale } = useRouter()
 
     const publicKey = useGeneratorRSAKey()
@@ -78,5 +78,5 @@ const SignUp = () => {
     )
 }
 
-export default SignUp
+export default Sign_up
 

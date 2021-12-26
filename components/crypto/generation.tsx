@@ -1,5 +1,13 @@
 import React, {useEffect, useState} from "react";
 
+// TODO - https://developer.mozilla.org/zh-CN/docs/Web/API/SubtleCrypto
+// Storing keys
+// CryptoKey objects can be stored using the structured clone algorithm,
+// meaning that you can store and retrieve them using standard web storage APIs.
+// The specification expects that most developers will use the IndexedDB API to store CryptoKey objects.
+
+// https://datatracker.ietf.org/doc/html/rfc3447
+
 const useGeneratorRSAKey = () => {
     const [publicKey, setPublicKey] = useState("")
 
@@ -38,7 +46,6 @@ const useGeneratorRSAKey = () => {
         Export the given key and write it into the "exported-key" space.
     */
     const exportPublicKey = (key: CryptoKey | undefined) => {
-
         if (key) {
             window.crypto.subtle.exportKey(
               "spki",

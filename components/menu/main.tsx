@@ -37,6 +37,6 @@ exports.NoLogged = [
     },
     {
         "name": "Sign Up",
-        "address": "/accounts/signup"
+        "address": "/accounts/sign_up"
     }
 ]
