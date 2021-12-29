@@ -2,32 +2,16 @@ import React, {useState} from 'react';
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
-import {JSEncrypt} from "jsencrypt";
 
-const publicKey = `
------BEGIN RSA PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3XoYJw2L7sfGxmI30gpq
-fO0VlqVi4waBIpkK1Cyh6OC2cUUAGxxEOUZvczbmWyKlldiyUQpAU8YgKD1KIwdi
-JoMpaIqRA1ZONQKfL27c+I1bvUFI+JjxRudgIl8+zMo8ZLB6h7gOfdZlFxXqKQe6
-cd8zMiMgqysdTqOyoPsJn3jXSSLAXHBa/VO4nH7idumbrQlQHkpa34AyUqCrKx75
-QtsDOCXNxFS/j7oj5CQOKWIShUi0gCRn3Y2KpFk3+qSo9RJUWC180SSPlbj28eEv
-vgBK6VwR4Tlg49vhKhi3Rd7bLMSUngazoJWpG32+0EePZRHwCmCLA+7RfaSsXm/8
-vwIDAQAB
------END RSA PUBLIC KEY-----`
 const Saved: NextPage = () => {
   const [file, setFile] = useState()
 
   const upload = ({e}: { e: any }) => {
-    console.log(`上传的是：${e.target.files[0].type}`)
     setFile(e.target)
   }
 
-  // const crypt = new JSEncrypt({default_key_size: "2056"})
-
   const encrypt = () => {
-    // crypt.setKey(publicKey)
-    // crypt.encrypt("xxx")
-    // console.log(crypt.encrypt("xxx"))
+
   }
 
   return (
