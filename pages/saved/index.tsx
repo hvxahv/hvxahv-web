@@ -2,18 +2,117 @@ import React, {useState} from 'react';
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
+import {EncryptData} from "../../components/crypto/encrypt";
+import {Create, Get} from "../../components/indexed/rsa";
+import {GenerateKey} from "../../components/crypto/generate";
+import { create, Options } from 'ipfs-http-client';
+import {DecryptData, TextEncoding} from "../../components/crypto/decrypt";
+import {ab2str, str2ab} from "../../components/crypto/conversion";
+import {hash} from "immutable";
+import loadCustomRoutes from "next/dist/lib/load-custom-routes";
+import { ExportPrivateKey } from '../../components/crypto/export';
+import { ImportPrivateKey } from '../../components/crypto/import';
 
 const Saved: NextPage = () => {
-  const [file, setFile] = useState()
+  const [hash, setHash] = useState("")
 
-  const upload = ({e}: { e: any }) => {
-    setFile(e.target)
+  const ipfsAPI = "http://127.0.0.1:5001"
+
+  // The file is uploaded to IPFS and the returned hash is encrypted and submitted to the hvxahv server.
+  // The encrypted hash obtained from hvxahv is decrypted by the local rsa private key and displayed to the client.
+
+  const upload = async (e: any) => {
+    const name = e.target.files[0].name
+    const type = e.target.files[0].type
+    const client = create(ipfsAPI as Options)
+    const { path } = await client.add(e.target.files[0])
+    console.log(path)
+    const hash = await encrypt(path)
+    console.log(name, type, hash)
+    post(name, type, hash)
+
   }
 
-  const encrypt = () => {
-
+  const encrypt = async (hash: string) => {
+    const account = await Get("hvturingga")
+    const res = await EncryptData(account.publicKey, TextEncoding(hash))
+    const x = ab2str(res)
+    return window.btoa(x)
   }
 
+  const post = (name: string, type: string, hash: string) => {
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVdWlkIjoiIiwiRW1haWwiOiJ4QGRpc2lzbS5jb20iLCJVc2VyIjoiaHZ0dXJpbmdnYSIsIlBhc3N3b3JkIjoiaHZ4YWh2MTIzIiwiRGV2aWNlc0lEIjoiMmU5MmE0YmUtNzNmYS00YzgxLWEyZjEtN2M5NWI0MmU0YzQxIiwiZXhwIjoxNjQ2MjIzODA5LCJpYXQiOjE2NDEwMzk4MDksImlzcyI6Imh2eGFodi5oYWxmbWVtb3JpZXMuY29tIiwic3ViIjoidG9rZW4ifQ.BpMSsa48vhXv1AZLvbzoOphgcp9ywOP_WeKGGmrJrcg");
+
+    const formdata = new FormData();
+    formdata.append("hash", hash);
+    formdata.append("type", type);
+    formdata.append("name", name);
+
+    const requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: formdata,
+      redirect: 'follow'
+    };
+
+    // @ts-ignore
+    fetch("http://localhost:8088/api/v1/saved", requestOptions)
+      .then(response => response.text())
+      .then(result => console.log(result))
+      .catch(error => console.log('error', error));
+  }
+
+  const handleGet = () => {
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVdWlkIjoiIiwiRW1haWwiOiJ4QGRpc2lzbS5jb20iLCJVc2VyIjoiaHZ0dXJpbmdnYSIsIlBhc3N3b3JkIjoiaHZ4YWh2MTIzIiwiRGV2aWNlc0lEIjoiMmU5MmE0YmUtNzNmYS00YzgxLWEyZjEtN2M5NWI0MmU0YzQxIiwiZXhwIjoxNjQ2MjIzODA5LCJpYXQiOjE2NDEwMzk4MDksImlzcyI6Imh2eGFodi5oYWxmbWVtb3JpZXMuY29tIiwic3ViIjoidG9rZW4ifQ.BpMSsa48vhXv1AZLvbzoOphgcp9ywOP_WeKGGmrJrcg");
+
+    const requestOptions = {
+      method: 'GET',
+      headers: myHeaders,
+      redirect: 'follow'
+    };
+
+    // @ts-ignore
+    fetch("http://localhost:8088/api/v1/saved/724091275276976129", requestOptions)
+      .then(res => res.json())
+      .then(res => {
+        console.log(res)
+        console.log(res.message.Name)
+        console.log(res.message.FileType)
+        console.log(res.message.Hash)
+        decrypt(res.message.Hash).then(r => {
+          const h = ab2str(r)
+
+          setHash(h)
+
+        })
+      })
+      .catch(error => console.log('error', error));
+  }
+
+  const decrypt = async (hash: string) => {
+    const account = await Get("hvturingga")
+    const b = window.atob(hash)
+    const ab = str2ab(b)
+    return await DecryptData(account.privateKey, ab)
+  }
+
+  const handleGenKey = () => {
+    GenerateKey().then(r => {
+      Create("hvturingga", r.privateKey, r.publicKey).then(r => {
+        console.log(r)
+      })
+    })
+  }
+  const handleGetKey = () => {
+    Get("hvturingga").then(r => {
+      console.log(r.privateKey)
+      // ExportPrivateKey(r.privateKey).then(r => {
+      //   console.log(r)
+      // })
+    })
+  }
   return (
     <div className={styles.container}>
       <Head>
@@ -23,10 +122,17 @@ const Saved: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-      <div>
-        <input type="file" onChange={e => upload({e: e})}/>
-        <button onClick={() => encrypt()}>ENCRYPT</button>
-      </div>
+        <div>
+          <input type="file" onChange={e => upload(e)}/>
+        </div>
+        <div>
+          <button onClick={() => handleGet()}>Get</button>
+          <button onClick={() => handleGenKey()}> Gen Key</button>
+          <button onClick={() => handleGetKey()}> Get Key</button>
+        </div>
+        <div>
+          <code>{hash && hash}</code>
+        </div>
       </main>
 
       <footer className={styles.footer}>

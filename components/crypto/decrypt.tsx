@@ -4,19 +4,19 @@
 // and the data to decrypt (also known as "ciphertext").
 // It returns a Promise which will be fulfilled with the decrypted data (also known as "plaintext").
 // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/decrypt
-export const DecryptData = async (privateKey: CryptoKey | undefined, ciphertext: ArrayBuffer) => {
-    if (privateKey == undefined) {
-      return
-    }
-    return await window.crypto.subtle.decrypt(
-      {
-        name: "RSA-OAEP"
-      },
-      privateKey,
-      ciphertext
-    );
+export const DecryptData = async (privateKey: CryptoKey | undefined, buffer: ArrayBuffer) => {
+  if (privateKey == undefined) {
+    return
   }
-  export const textEncoding = (text: string) => {
-    const enc = new TextEncoder();
-    return enc.encode(text);
-  }
+  return await window.crypto.subtle.decrypt(
+    {
+      name: "RSA-OAEP"
+    },
+    privateKey,
+    buffer
+  );
+}
+export const TextEncoding = (text: string) => {
+  const enc = new TextEncoder();
+  return enc.encode(text);
+}

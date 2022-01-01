@@ -30,6 +30,7 @@ export const ExportPrivateKey = async (privateKey: CryptoKey | undefined) => {
     "pkcs8",
     privateKey as CryptoKey
   )
+
   const b64 = window.btoa(ab2str(k))
   return `-----BEGIN PRIVATE KEY-----\n${b64}\n-----END PRIVATE KEY-----`
 }

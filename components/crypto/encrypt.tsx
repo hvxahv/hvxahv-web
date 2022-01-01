@@ -3,7 +3,7 @@
 // some algorithm-specific parameters, and the data to encrypt (also known as "plaintext").
 // It returns a Promise which will be fulfilled with the encrypted data (also known as "ciphertext").
 // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/encrypt
-export const EncryptData = async (publicKey: CryptoKey | undefined, data: any) => {
+export const EncryptData = async (publicKey: CryptoKey | undefined, data: ArrayBuffer) => {
     if (publicKey == undefined) {
       return
     }

@@ -15,7 +15,7 @@ export const ImportPrivateKey = async (privatePem: string | undefined) => {
     "pkcs8",
     str2ab(bd),
     {
-      name: "RSA-PSS",
+      name: "RSA-OAEP",
       // Consider using a 4096-bit key for systems that require long-term security
       // @ts-ignore
       modulusLength: 4096,
@@ -23,7 +23,7 @@ export const ImportPrivateKey = async (privatePem: string | undefined) => {
       hash: "SHA-256",
     },
     true,
-    ["sign"]
+    ["decrypt"]
   )
 }
 
