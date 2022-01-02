@@ -1,5 +1,5 @@
-// @ts-ignore
-exports.Logged = [
+
+export const Logged = [
   {
     "name": "home",
     "address": "/"
@@ -24,9 +24,13 @@ exports.Logged = [
     "name": "new",
     "address": "/new/article"
   },
+  {
+    "name": "saved",
+    "address": "/saved"
+  }
 ]
 
-exports.NoLogged = [
+export const NoLogged = [
   {
     "name": "home",
     "address": "/"
@@ -39,8 +43,4 @@ exports.NoLogged = [
     "name": "Sign Up",
     "address": "/accounts/sign_up"
   },
-  {
-    "name": "Saved",
-    "address": "/saved"
-  }
 ]

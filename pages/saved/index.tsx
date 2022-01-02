@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
@@ -8,15 +8,21 @@ import {GenerateKey} from "../../components/crypto/generate";
 import { create, Options } from 'ipfs-http-client';
 import {DecryptData, TextEncoding} from "../../components/crypto/decrypt";
 import {ab2str, str2ab} from "../../components/crypto/conversion";
-import {hash} from "immutable";
-import loadCustomRoutes from "next/dist/lib/load-custom-routes";
-import { ExportPrivateKey } from '../../components/crypto/export';
-import { ImportPrivateKey } from '../../components/crypto/import';
+import {useRouter} from "next/router";
 
 const Saved: NextPage = () => {
   const [hash, setHash] = useState("")
-
+  const router = useRouter()
+  const [token, setToken] = useState("")
   const ipfsAPI = "http://127.0.0.1:5001"
+  useEffect(() => {
+    const token = localStorage.getItem("hvxahv_login_token")
+    if (token == undefined) {
+      router.push("/accounts/sign_up")
+      return
+    }
+    setToken(token)
+  }, [])
 
   // The file is uploaded to IPFS and the returned hash is encrypted and submitted to the hvxahv server.
   // The encrypted hash obtained from hvxahv is decrypted by the local rsa private key and displayed to the client.
@@ -42,7 +48,7 @@ const Saved: NextPage = () => {
 
   const post = (name: string, type: string, hash: string) => {
     const myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVdWlkIjoiIiwiRW1haWwiOiJ4QGRpc2lzbS5jb20iLCJVc2VyIjoiaHZ0dXJpbmdnYSIsIlBhc3N3b3JkIjoiaHZ4YWh2MTIzIiwiRGV2aWNlc0lEIjoiMmU5MmE0YmUtNzNmYS00YzgxLWEyZjEtN2M5NWI0MmU0YzQxIiwiZXhwIjoxNjQ2MjIzODA5LCJpYXQiOjE2NDEwMzk4MDksImlzcyI6Imh2eGFodi5oYWxmbWVtb3JpZXMuY29tIiwic3ViIjoidG9rZW4ifQ.BpMSsa48vhXv1AZLvbzoOphgcp9ywOP_WeKGGmrJrcg");
+    myHeaders.append("Authorization", `Bearer ${token}`);
 
     const formdata = new FormData();
     formdata.append("hash", hash);
@@ -65,7 +71,7 @@ const Saved: NextPage = () => {
 
   const handleGet = () => {
     const myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVdWlkIjoiIiwiRW1haWwiOiJ4QGRpc2lzbS5jb20iLCJVc2VyIjoiaHZ0dXJpbmdnYSIsIlBhc3N3b3JkIjoiaHZ4YWh2MTIzIiwiRGV2aWNlc0lEIjoiMmU5MmE0YmUtNzNmYS00YzgxLWEyZjEtN2M5NWI0MmU0YzQxIiwiZXhwIjoxNjQ2MjIzODA5LCJpYXQiOjE2NDEwMzk4MDksImlzcyI6Imh2eGFodi5oYWxmbWVtb3JpZXMuY29tIiwic3ViIjoidG9rZW4ifQ.BpMSsa48vhXv1AZLvbzoOphgcp9ywOP_WeKGGmrJrcg");
+    myHeaders.append("Authorization", `Bearer ${token}`);
 
     const requestOptions = {
       method: 'GET',
@@ -74,7 +80,7 @@ const Saved: NextPage = () => {
     };
 
     // @ts-ignore
-    fetch("http://localhost:8088/api/v1/saved/724091275276976129", requestOptions)
+    fetch("http://localhost:8088/api/v1/saved/724310552715395073", requestOptions)
       .then(res => res.json())
       .then(res => {
         console.log(res)
@@ -98,21 +104,7 @@ const Saved: NextPage = () => {
     return await DecryptData(account.privateKey, ab)
   }
 
-  const handleGenKey = () => {
-    GenerateKey().then(r => {
-      Create("hvturingga", r.privateKey, r.publicKey).then(r => {
-        console.log(r)
-      })
-    })
-  }
-  const handleGetKey = () => {
-    Get("hvturingga").then(r => {
-      console.log(r.privateKey)
-      // ExportPrivateKey(r.privateKey).then(r => {
-      //   console.log(r)
-      // })
-    })
-  }
+
   return (
     <div className={styles.container}>
       <Head>
@@ -127,8 +119,6 @@ const Saved: NextPage = () => {
         </div>
         <div>
           <button onClick={() => handleGet()}>Get</button>
-          <button onClick={() => handleGenKey()}> Gen Key</button>
-          <button onClick={() => handleGetKey()}> Get Key</button>
         </div>
         <div>
           <code>{hash && hash}</code>

@@ -1,53 +1,35 @@
 import Head from 'next/head'
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import GoBack from "../../components/buttons/back";
 import {useRouter} from "next/router";
 import {GenerateKey} from "../../components/crypto/generate";
 import {Create, Get} from "../../components/indexed/rsa";
-import {ExportPrivateKey, ExportPublicKey} from "../../components/crypto/export";
+import {ExportPublicKey} from "../../components/crypto/export";
 
 const SignUp = () => {
-  const { locale } = useRouter()
+  const router = useRouter()
   const [username, setUsername] = useState("hvturingga")
   const [password, setPassword] = useState("hvxahv123")
   const [mail, setMail] = useState("x@disism.com")
   const [message, setMessage] = useState({})
-  const [privateKey, setPrivateKey] = useState("")
-  const [publicKey, setPublicKey] = useState("")
 
+  const handleRegistered = async () => {
+    const account = await Get(username)
 
-  useEffect(() => {
-    GenerateKey().then(r => {
-      ExportPrivateKey(r.privateKey).then(r => {
-        if (r == undefined) {
-          return
-        }
-        setPrivateKey(r)
-      })
-      ExportPublicKey(r.publicKey).then(r => {
-        if (r == undefined) {
-          return
-        }
-        setPublicKey(r)
-      })
-    })
-  }, [])
-
-  const handleRegistered = () => {
-    Get(username).then(r => {
-      if (r != undefined) {
-        setMessage("Username already exists")
-        return
-      } else {
-        Create(username, privateKey, publicKey)
-      }
-    })
+    if (account.publicKey != undefined || account.privateKey != undefined) {
+      setMessage("USERNAME_ALREADY_EXISTS")
+      return
+    }
+    const k = await GenerateKey()
+    const c = await Create(username, k.privateKey, k.publicKey)
+    const privateKey = await ExportPublicKey(k.publicKey)
 
     const data = new FormData();
     data.append("mail", mail)
     data.append("username", username);
     data.append("password", password);
-    data.append("publicKey", publicKey)
+    data.append("publicKey", privateKey as string)
+
     const requestOptions: Request = {
       method: 'POST',
       // @ts-ignore
@@ -58,9 +40,11 @@ const SignUp = () => {
     fetch(`${process.env.address}/accounts/signup`, requestOptions)
       .then(res => res.json())
       .then(res => {
-          setMessage(res)
+        setMessage(res)
+        localStorage.setItem("hvxahv_name", username)
+        router.push("/accounts/inform")
       })
-      .catch(err => console.log('error', err));
+      .catch(err => console.log('error', err))
   }
 
   console.log(message)
@@ -83,7 +67,7 @@ const SignUp = () => {
             />
 
             <label htmlFor="username">
-                Username
+              Username
             </label>
             <input type="text" placeholder="username" name="username"
                    value={username} onChange={e => setUsername(e.target.value)}

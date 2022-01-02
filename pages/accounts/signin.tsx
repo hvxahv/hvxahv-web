@@ -6,8 +6,6 @@ import GoBack from "../../components/buttons/back";
 import process from "../../next.config";
 
 const Signin = () => {
-    const { locale } = useRouter()
-
     const router = useRouter()
     const [username, setUsername] = useState("hvturingga")
     const [password, setPassword] = useState("hvxahv123")
@@ -22,7 +20,7 @@ const Signin = () => {
             method: 'POST',
             body: data,
             redirect: 'follow'
-        };
+        }
 
         // @ts-ignore
         fetch(`${process.env.address}/accounts/signin`, requestOptions)
@@ -32,17 +30,17 @@ const Signin = () => {
                 localStorage.setItem("hvxahv_login_token", res.token)
                 localStorage.setItem("hvxahv_device_id", res.deviceID)
                 localStorage.setItem("hvxahv_device_vapid_publicKey", res.publicKey)
-                // router.reload()
+                router.reload()
             })
             .catch(err => console.log('error', err));
     }
 
-    // useEffect(() => {
-    //     const token = localStorage.getItem("hvxahv_token")
-    //     if (token !== null) {
-    //         router.push("/iam")
-    //     }
-    // }, [])
+    useEffect(() => {
+        const token = localStorage.getItem("hvxahv_login_token")
+        if (token !== null) {
+          router.push("/iam")
+        }
+    }, [])
 
     console.log(message)
     return (

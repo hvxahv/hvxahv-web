@@ -46,3 +46,12 @@ export const Get = async (account: string) => {
     publicKey
   }
 }
+
+export const Delete = async (account: string) => {
+  // const a = await  db.rsa.get(account)
+  // console.log(a)
+  // const d = await db.rsa.delete(a.)
+  // return {
+  //   account
+  // }
+}
