@@ -12,6 +12,11 @@ import {useRouter} from "next/router";
 
 const Saved: NextPage = () => {
   const [hash, setHash] = useState("")
+  const [savedID, setSavedID] = useState("")
+  const handleInputSavedID = (e: any) => {
+    setSavedID(e.target.value)
+  }
+
   const router = useRouter()
   const [token, setToken] = useState("")
   const ipfsAPI = "http://127.0.0.1:5001"
@@ -22,7 +27,7 @@ const Saved: NextPage = () => {
       return
     }
     setToken(token)
-  }, [])
+  }, [router])
 
   // The file is uploaded to IPFS and the returned hash is encrypted and submitted to the hvxahv server.
   // The encrypted hash obtained from hvxahv is decrypted by the local rsa private key and displayed to the client.
@@ -80,7 +85,7 @@ const Saved: NextPage = () => {
     };
 
     // @ts-ignore
-    fetch("http://localhost:8088/api/v1/saved/724310552715395073", requestOptions)
+    fetch(`http://localhost:8088/api/v1/saved/${savedID}`, requestOptions)
       .then(res => res.json())
       .then(res => {
         console.log(res)
@@ -118,10 +123,24 @@ const Saved: NextPage = () => {
           <input type="file" onChange={e => upload(e)}/>
         </div>
         <div>
+          <h2>Get content by hash</h2>
+          <input type="text" name="hash" onChange={e => handleInputSavedID(e)}/>
           <button onClick={() => handleGet()}>Get</button>
         </div>
         <div>
-          <code>{hash && hash}</code>
+          {hash && <div>
+            <code>{hash}</code>
+            <div>
+              Preview: →
+              <a href={`http://localhost:8081/ipfs/${hash}`}
+                 target={`_blank`}
+                 style={{ color: `blue` }}
+              >
+                GO...
+              </a>
+              ←
+            </div>
+          </div>}
         </div>
       </main>
 

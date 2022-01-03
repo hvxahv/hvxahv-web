@@ -3,6 +3,43 @@ import React, {useEffect} from "react";
 
 const Notifications: NextComponentType = () => {
   useEffect(() => {
+    const subscription = (vapidPublicKey: string) => {
+      navigator.serviceWorker.ready
+        .then((registration: ServiceWorkerRegistration) => {
+          return registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+          })
+        })
+        .then((subscription: PushSubscription) => {
+          console.log(subscription.toJSON())
+
+          const data = new FormData()
+          const myHeaders = new Headers();
+          // @ts-ignore
+          myHeaders.append("Authorization", `Bearer ${localStorage.getItem("hvxahv_login_token")}`);
+          const {endpoint, keys: {auth, p256dh}}: any | undefined = subscription.toJSON()
+          // @ts-ignore
+          data.append("device_id", localStorage.getItem("hvxahv_device_id"))
+          data.append("endpoint", endpoint)
+          data.append("auth", auth)
+          data.append("p256dh", p256dh)
+
+          const requestOptions: RequestInit = {
+            method: 'POST',
+            headers: myHeaders,
+            body: data,
+            redirect: 'follow'
+          };
+
+          fetch("http://localhost:8088/api/v1/notify/sub", requestOptions)
+            .then(response => response.json())
+            .then(result => console.log(result))
+            .catch(error => console.log('error', error));
+        })
+        .catch(err => console.error(err));
+    }
+
     if (Notification.permission === `default`) {
       Notification.requestPermission().then(r => {
         navigator.serviceWorker.register('/service-worker.js').then(r => {
@@ -31,43 +68,6 @@ const Notifications: NextComponentType = () => {
       .replace(/_/g, '/');
     const rawData: string = window.atob(base64);
     return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
-  }
-
-  const subscription = (vapidPublicKey: string) => {
-    navigator.serviceWorker.ready
-      .then((registration: ServiceWorkerRegistration) => {
-        return registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-        })
-      })
-      .then((subscription: PushSubscription) => {
-        console.log(subscription.toJSON())
-
-        const data = new FormData()
-        const myHeaders = new Headers();
-        // @ts-ignore
-        myHeaders.append("Authorization", `Bearer ${localStorage.getItem("hvxahv_login_token")}`);
-        const {endpoint, keys: {auth, p256dh}}: any | undefined = subscription.toJSON()
-        // @ts-ignore
-        data.append("device_id", localStorage.getItem("hvxahv_device_id"))
-        data.append("endpoint", endpoint)
-        data.append("auth", auth)
-        data.append("p256dh", p256dh)
-
-        const requestOptions: RequestInit = {
-          method: 'POST',
-          headers: myHeaders,
-          body: data,
-          redirect: 'follow'
-        };
-
-        fetch("http://localhost:8088/api/v1/notify/sub", requestOptions)
-          .then(response => response.json())
-          .then(result => console.log(result))
-          .catch(error => console.log('error', error));
-      })
-      .catch(err => console.error(err));
   }
 
   return (
