@@ -1,13 +1,12 @@
 import Head from 'next/head'
-import React, {useState} from "react";
-import GoBack from "../../components/buttons/back";
-import {useRouter} from "next/router";
-import {ExportPrivateKey, ExportPublicKey} from "../../components/crypto/export";
-import {Create, Get} from "../../components/indexed/rsa";
-import {ImportPrivateKey, ImportPublicKey} from "../../components/crypto/import";
+import React from "react";
+import GoBack from "../../../components/buttons/back";
+import { useRouter } from "next/router";
+import { SaveRSA } from "../../../components/indexed/rsa";
+import { ImportPrivateKey, ImportPublicKey } from "../../../components/crypto/import";
 
-const Load = () => {
-  const router  = useRouter()
+const Upload = () => {
+  const router = useRouter()
   const upload = async (e: any) => {
     const name = localStorage.getItem("hvxahv_name")
     const token = localStorage.getItem("hvxahv_login_token")
@@ -31,7 +30,7 @@ const Load = () => {
           }
           const privateKey = await ImportPrivateKey(e.target.result as string)
           const publicKeyResult = await ImportPublicKey(res.public_key)
-          const a = await Create(name as string, privateKey, publicKeyResult)
+          const a = await SaveRSA(name as string, privateKey, publicKeyResult)
           console.log(a)
         }
 
@@ -42,7 +41,7 @@ const Load = () => {
   return (
     <div>
       <Head>
-        <title>load</title>
+        <title>RSA Upload</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -52,13 +51,13 @@ const Load = () => {
 
         <div>
           <h2>Your Private Key was not found. You must upload your Private Key to continue.</h2>
-          <input type="file" onChange={e => upload(e)}/>
-          <button onClick={() =>　router.push("/accounts/signin")}>OK! GO TO SIGN IN.</button>
+          <input type="file" onChange={e => upload(e)} />
+          <button onClick={() => router.push("/accounts/signin")}>OK! GO TO SIGN IN.</button>
         </div>
       </main>
     </div>
   )
 }
 
-export default Load
+export default Upload
 

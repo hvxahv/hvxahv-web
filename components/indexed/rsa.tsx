@@ -1,6 +1,6 @@
 import Dexie, { Table } from 'dexie';
-import {ExportPrivateKey, ExportPublicKey} from "../crypto/export";
-import {ImportPrivateKey, ImportPublicKey} from "../crypto/import";
+import { ExportPrivateKey, ExportPublicKey } from "../crypto/export";
+import { ImportPrivateKey, ImportPublicKey } from "../crypto/import";
 
 export interface RSA {
   account: string;
@@ -21,8 +21,11 @@ export class RSAIndexedDB extends Dexie {
 
 const db = new RSAIndexedDB()
 
-export const Create = async (account: string, private_pem: CryptoKey | undefined, public_pem: CryptoKey | undefined) => {
-
+export const SaveRSA = async (account: string, private_pem: CryptoKey | undefined, public_pem: CryptoKey | undefined) => {
+  const a = await GetRSA(account)
+  if (a.publicKey != undefined || a.privateKey != undefined) {
+    return
+  }
   const private_key = await ExportPrivateKey(private_pem)
   const public_key = await ExportPublicKey(public_pem)
   if (private_key == undefined || public_key == undefined) {
@@ -37,8 +40,8 @@ export const Create = async (account: string, private_pem: CryptoKey | undefined
 
 }
 
-export const Get = async (account: string) => {
-  const a = await  db.rsa.get(account)
+export const GetRSA = async (account: string) => {
+  const a = await db.rsa.get(account)
   const privateKey = await ImportPrivateKey(a?.private_key)
   const publicKey = await ImportPublicKey(a?.public_key)
   return {
@@ -47,11 +50,19 @@ export const Get = async (account: string) => {
   }
 }
 
-export const Delete = async (account: string) => {
-  // const a = await  db.rsa.get(account)
-  // console.log(a)
-  // const d = await db.rsa.delete(a.)
-  // return {
-  //   account
-  // }
+export const DeleteRSA = async (account: string) => {
+  const a = await db.rsa.get(account)
+  if (a?.account == undefined) {
+    return
+  }
+  await db.rsa.delete(a?.account).then(() => {
+    return
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
+export const isHaveRSA = async (account: string) => {
+  const a = await GetRSA(account)
+  return !(a.publicKey == undefined || a.privateKey == undefined)
 }

@@ -1,14 +1,13 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
-import {EncryptData} from "../../components/crypto/encrypt";
-import {Create, Get} from "../../components/indexed/rsa";
-import {GenerateKey} from "../../components/crypto/generate";
+import { EncryptData } from "../../components/crypto/encrypt";
+import { GetRSA } from "../../components/indexed/rsa";
 import { create, Options } from 'ipfs-http-client';
-import {DecryptData, TextEncoding} from "../../components/crypto/decrypt";
-import {ab2str, str2ab} from "../../components/crypto/conversion";
-import {useRouter} from "next/router";
+import { DecryptData, TextEncoding } from "../../components/crypto/decrypt";
+import { ab2str, str2ab } from "../../components/crypto/conversion";
+import { useRouter } from "next/router";
 
 const Saved: NextPage = () => {
   const [hash, setHash] = useState("")
@@ -45,7 +44,7 @@ const Saved: NextPage = () => {
   }
 
   const encrypt = async (hash: string) => {
-    const account = await Get("hvturingga")
+    const account = await GetRSA("hvturingga")
     const res = await EncryptData(account.publicKey, TextEncoding(hash))
     const x = ab2str(res)
     return window.btoa(x)
@@ -103,7 +102,7 @@ const Saved: NextPage = () => {
   }
 
   const decrypt = async (hash: string) => {
-    const account = await Get("hvturingga")
+    const account = await GetRSA("hvturingga")
     const b = window.atob(hash)
     const ab = str2ab(b)
     return await DecryptData(account.privateKey, ab)
@@ -120,11 +119,11 @@ const Saved: NextPage = () => {
 
       <main className={styles.main}>
         <div>
-          <input type="file" onChange={e => upload(e)}/>
+          <input type="file" onChange={e => upload(e)} />
         </div>
         <div>
           <h2>Get content by hash</h2>
-          <input type="text" name="hash" onChange={e => handleInputSavedID(e)}/>
+          <input type="text" name="hash" onChange={e => handleInputSavedID(e)} />
           <button onClick={() => handleGet()}>Get</button>
         </div>
         <div>
@@ -133,8 +132,8 @@ const Saved: NextPage = () => {
             <div>
               Preview: →
               <a href={`http://localhost:8081/ipfs/${hash}`}
-                 target={`_blank`}
-                 style={{ color: `blue` }}
+                target={`_blank`}
+                style={{ color: `blue` }}
               >
                 GO...
               </a>

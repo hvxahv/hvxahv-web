@@ -1,10 +1,10 @@
 import Head from 'next/head'
-import React, {useState} from "react";
+import React, { useState } from "react";
 import GoBack from "../../components/buttons/back";
-import {useRouter} from "next/router";
-import {GenerateKey} from "../../components/crypto/generate";
-import {Create, Get} from "../../components/indexed/rsa";
-import {ExportPublicKey} from "../../components/crypto/export";
+import { useRouter } from "next/router";
+import { GenerateRSA } from "../../components/crypto/generate";
+import { SaveRSA, GetRSA } from "../../components/indexed/rsa";
+import { ExportPublicKey } from "../../components/crypto/export";
 
 const SignUp = () => {
   const router = useRouter()
@@ -14,14 +14,14 @@ const SignUp = () => {
   const [message, setMessage] = useState({})
 
   const handleRegistered = async () => {
-    const account = await Get(username)
+    const account = await GetRSA(username)
 
     if (account.publicKey != undefined || account.privateKey != undefined) {
       setMessage("USERNAME_ALREADY_EXISTS")
       return
     }
-    const k = await GenerateKey()
-    const c = await Create(username, k.privateKey, k.publicKey)
+    const k = await GenerateRSA()
+    const c = await SaveRSA(username, k.privateKey, k.publicKey)
     const privateKey = await ExportPublicKey(k.publicKey)
 
     const data = new FormData();
@@ -42,7 +42,7 @@ const SignUp = () => {
       .then(res => {
         setMessage(res)
         localStorage.setItem("hvxahv_name", username)
-        router.push("/accounts/inform")
+        router.push("/accounts/rsa/download")
       })
       .catch(err => console.log('error', err))
   }
@@ -59,30 +59,30 @@ const SignUp = () => {
         <GoBack />
         <h3>REGISTERED</h3>
         <section>
-            <label htmlFor="mail">
-                Mail
-            </label>
-            <input type="text" placeholder="mail" name="mail"
-                   value={mail} onChange={e => setMail(e.target.value)}
-            />
+          <label htmlFor="mail">
+            Mail
+          </label>
+          <input type="text" placeholder="mail" name="mail"
+            value={mail} onChange={e => setMail(e.target.value)}
+          />
 
-            <label htmlFor="username">
-              Username
-            </label>
-            <input type="text" placeholder="username" name="username"
-                   value={username} onChange={e => setUsername(e.target.value)}
-            />
+          <label htmlFor="username">
+            Username
+          </label>
+          <input type="text" placeholder="username" name="username"
+            value={username} onChange={e => setUsername(e.target.value)}
+          />
 
-            <label htmlFor="password">
-               Password
-            </label>
-            <input type="password" placeholder="password" name="password"
-                   value={password} onChange={e => setPassword(e.target.value)}
-            />
+          <label htmlFor="password">
+            Password
+          </label>
+          <input type="password" placeholder="password" name="password"
+            value={password} onChange={e => setPassword(e.target.value)}
+          />
         </section>
 
         <button onClick={() => handleRegistered()} style={{ marginRight: `.5rem` }}>
-            SignUp
+          SignUp
         </button>
       </main>
     </div>

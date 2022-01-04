@@ -13,7 +13,7 @@
  from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
 */
 
-export const GenerateKey = async () => {
+export const GenerateRSA = async () => {
   return await window.crypto.subtle.generateKey(
     {
       name: "RSA-OAEP",
