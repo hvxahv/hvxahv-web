@@ -14,5 +14,6 @@ export const GetDevices = async (token: string) => {
     return res.json()
   })
 
+  console.log(res)
   return res
 }

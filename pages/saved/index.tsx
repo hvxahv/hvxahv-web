@@ -8,8 +8,11 @@ import { create, Options } from 'ipfs-http-client';
 import { DecryptData, TextEncoding } from "../../components/crypto/decrypt";
 import { ab2str, str2ab } from "../../components/crypto/conversion";
 import { useRouter } from "next/router";
+import {GetSaves} from "../../components/saved/fetch";
+import {route} from "next/dist/server/router";
 
 const Saved: NextPage = () => {
+  const [saves, setSaves] = useState<any[]>([])
   const [hash, setHash] = useState("")
   const [savedID, setSavedID] = useState("")
   const handleInputSavedID = (e: any) => {
@@ -26,6 +29,9 @@ const Saved: NextPage = () => {
       return
     }
     setToken(token)
+    GetSaves(token).then(r => {
+      setSaves(r.saves)
+    })
   }, [router])
 
   // The file is uploaded to IPFS and the returned hash is encrypted and submitted to the hvxahv server.
@@ -108,6 +114,13 @@ const Saved: NextPage = () => {
     return await DecryptData(account.privateKey, ab)
   }
 
+  const handleCheckFileByHash = (hash: string) => {
+    decrypt(hash).then(r => {
+      const h = ab2str(r)
+      console.log(h)
+      window.location.href=`http://localhost:8081/ipfs/${h}`
+    })
+  }
 
   return (
     <div className={styles.container}>
@@ -118,6 +131,16 @@ const Saved: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
+        <div>
+          {saves && saves.map((i, idx) => {
+            return (
+              <ul key={idx}>
+                <li>{i.Name} - {i.FileType} - <button onClick={() => handleCheckFileByHash(i.Hash)}>CHECK</button></li>
+              </ul>
+            )
+          })}
+        </div>
+
         <div>
           <input type="file" onChange={e => upload(e)} />
         </div>
