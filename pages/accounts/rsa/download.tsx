@@ -20,7 +20,6 @@ const Download = () => {
     setHvxahvName(name)
   }, [])
   const d = async () => {
-
     const account = await GetRSA(hvxahvName)
     const privateKey = await ExportPrivateKey(account.privateKey)
     const publicKey = await ExportPublicKey(account.publicKey)
@@ -78,7 +77,7 @@ const Download = () => {
           <button onClick={() => handleRSAKeyDownload()}>Download PrivateKey</button>
         </div>
         <div>
-          <button onClick={() => router.push("/accounts/signin")}>OK! GO TO SIGN IN.</button>
+          <button onClick={() => router.push("/accounts/signin")}>HAS BEEN DOWNLOADED SUCCESSFULLY! GO TO SIGN IN.</button>
         </div>
       </main>
     </div>

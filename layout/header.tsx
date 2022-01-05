@@ -11,6 +11,7 @@ const Header = () => {
   const router = useRouter()
   const [isLogin, setIsLogin] = useState(true)
   const [hvxahv_name, setHvxahvName] = useState("")
+  const [token, setToken] = useState("")
   const getKey = async (name: string) => {
     const k = await isHaveRSA(name)
     if (!k) {
@@ -25,6 +26,7 @@ const Header = () => {
       setIsLogin(false)
       return
     }
+    setToken(token)
     getKey(name).then(() => {
       setHvxahvName(name)
     })
@@ -35,12 +37,27 @@ const Header = () => {
 
   const handleLogout = async () => {
     await DeleteRSA(hvxahv_name)
-    localStorage.removeItem("hvxahv_device_id")
+    localStorage.removeItem("hvxahv_device_hash")
     localStorage.removeItem("hvxahv_login_token")
     localStorage.removeItem("hvxahv_device_vapid_publicKey")
     localStorage.removeItem("hvxahv_name")
-    router.reload()
-    await router.push("/")
+
+    // DELETE LOGIN.
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", `Bearer ${token}`);
+    const requestOptions = {
+      method: 'GET',
+      headers: myHeaders,
+      redirect: 'follow'
+    }
+    // @ts-ignore
+    fetch("http://localhost:8088/api/v1/accounts/logout", requestOptions)
+      .then(res => res.json())
+      .then(res => {
+        router.reload()
+        router.push("/")
+      })
+      .catch(error => console.log('error', error))
   }
 
   return (
@@ -62,7 +79,6 @@ const Header = () => {
           </div>
         }
       </div>
-      <button onClick={() => getKey("hvturingga")}>GET</button>
     </div>
   )
 }

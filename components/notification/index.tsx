@@ -20,7 +20,6 @@ const Notifications: NextComponentType = () => {
           myHeaders.append("Authorization", `Bearer ${localStorage.getItem("hvxahv_login_token")}`);
           const {endpoint, keys: {auth, p256dh}}: any | undefined = subscription.toJSON()
           // @ts-ignore
-          data.append("device_id", localStorage.getItem("hvxahv_device_id"))
           data.append("endpoint", endpoint)
           data.append("auth", auth)
           data.append("p256dh", p256dh)

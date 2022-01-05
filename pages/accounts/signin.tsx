@@ -28,7 +28,7 @@ const SignIn = () => {
       .then(res => {
         setMessage(res)
         localStorage.setItem("hvxahv_login_token", res.token)
-        localStorage.setItem("hvxahv_device_id", res.deviceID)
+        localStorage.setItem("hvxahv_device_hash", res.deviceID)
         localStorage.setItem("hvxahv_device_vapid_publicKey", res.publicKey)
         localStorage.setItem("hvxahv_name", username)
         isHaveRSA(username).then(r => {

@@ -1,18 +1,20 @@
 import Head from 'next/head'
-import React from "react";
+import React, {useEffect, useState} from "react";
 import GoBack from "../../../components/buttons/back";
 import { useRouter } from "next/router";
-import { SaveRSA } from "../../../components/indexed/rsa";
+import {isHaveRSA, SaveRSA} from "../../../components/indexed/rsa";
 import { ImportPrivateKey, ImportPublicKey } from "../../../components/crypto/import";
 
 const Upload = () => {
   const router = useRouter()
+  const [token, setToken] = useState("")
+  const [hvxahvName, setHvxahvName] = useState("")
+  const [deviceHash, setDeviceHash] = useState("")
+  const [devices, setDevices] = useState<any[]>([])
   const upload = async (e: any) => {
-    const name = localStorage.getItem("hvxahv_name")
-    const token = localStorage.getItem("hvxahv_login_token")
     const myHeaders = new Headers();
-    myHeaders.append("Authorization", `Bearer ${token}`);
 
+    myHeaders.append("Authorization", `Bearer ${token}`);
     const requestOptions: any = {
       method: 'GET',
       headers: myHeaders,
@@ -30,14 +32,72 @@ const Upload = () => {
           }
           const privateKey = await ImportPrivateKey(e.target.result as string)
           const publicKeyResult = await ImportPublicKey(res.public_key)
-          const a = await SaveRSA(name as string, privateKey, publicKeyResult)
-          console.log(a)
+          const a = await SaveRSA(hvxahvName, privateKey, publicKeyResult)
+          if (a != undefined) {
+            router.reload()
+          }
         }
 
       })
       .catch(error => console.log('error', error));
   }
 
+  useEffect(() => {
+    const n = localStorage.getItem("hvxahv_name")
+    if (n == undefined) {
+      return
+    }
+    setHvxahvName(n)
+    isHaveRSA(n).then(r => {
+      if (r) router.push("/iam")
+    })
+    
+    const t = localStorage.getItem("hvxahv_login_token")
+    if (t == undefined) {
+      return
+    }
+    setToken(t)
+
+    const d = localStorage.getItem("hvxahv_device_hash")
+    if (d == undefined) {
+      return
+    }
+    setDeviceHash(d)
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", `Bearer ${t}`);
+
+    const requestOptions = {
+      method: 'GET',
+      headers: myHeaders,
+      redirect: 'follow'
+    }
+    // @ts-ignore
+    fetch("http://localhost:8088/api/v1/accounts/devices", requestOptions)
+      .then(res => res.json())
+      .then(res => {
+        setDevices(res.devices)
+      })
+      .catch(error => console.log('error', error));
+  }, [router])
+
+  const handleRequestPrivate = (id: any) =>　{
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", `Bearer ${token}`);
+
+    const requestOptions = {
+      method: 'GET',
+      headers: myHeaders,
+      redirect: 'follow'
+    };
+
+    // @ts-ignore
+    fetch(`http://localhost:8088/api/v1/accounts/rsa/private?device_id=${id}`, requestOptions)
+      .then(res => res.json())
+      .then(res => {
+        console.log(res)
+      })
+      .catch(error => console.log('error', error));
+  }
   return (
     <div>
       <Head>
@@ -47,8 +107,27 @@ const Upload = () => {
 
       <main>
         <GoBack />
-        <h3>Load</h3>
-
+        <h3>Import Private Key</h3>
+        <div>
+          <h2>Request a private key from the currently logged-in device</h2>
+          <div>
+            {devices && devices.map((i, idx) => {
+              return (
+                  <div key={idx}>
+                    <p>{idx +1}: {i.Device}</p>
+                    <code>{i.Hash}</code>
+                    {i.Hash == deviceHash
+                      ?
+                    <p style={{ color: `blue` }}>Current Device</p>
+                      :
+                    <button onClick={() => handleRequestPrivate(i.ID)}>Request</button>
+                    }
+                    <hr/>
+                  </div>
+                )
+            })}
+          </div>
+        </div>
         <div>
           <h2>Your Private Key was not found. You must upload your Private Key to continue.</h2>
           <input type="file" onChange={e => upload(e)} />
