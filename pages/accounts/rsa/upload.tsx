@@ -4,6 +4,7 @@ import GoBack from "../../../components/buttons/back";
 import { useRouter } from "next/router";
 import {isHaveRSA, SaveRSA} from "../../../components/indexed/rsa";
 import { ImportPrivateKey, ImportPublicKey } from "../../../components/crypto/import";
+import {GetDevices} from "../../../components/devices/fetch";
 
 const Upload = () => {
   const router = useRouter()
@@ -63,21 +64,9 @@ const Upload = () => {
       return
     }
     setDeviceHash(d)
-    const myHeaders = new Headers();
-    myHeaders.append("Authorization", `Bearer ${t}`);
-
-    const requestOptions = {
-      method: 'GET',
-      headers: myHeaders,
-      redirect: 'follow'
-    }
-    // @ts-ignore
-    fetch("http://localhost:8088/api/v1/accounts/devices", requestOptions)
-      .then(res => res.json())
-      .then(res => {
-        setDevices(res.devices)
-      })
-      .catch(error => console.log('error', error));
+    GetDevices(t).then(r => {
+      setDevices(r.devices)
+    })
   }, [router])
 
   const handleRequestPrivate = (id: any) =>　{

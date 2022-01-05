@@ -9,10 +9,6 @@ export const Logged = [
     "address": "/accounts/search"
   },
   {
-    "name": "iam",
-    "address": "/iam"
-  },
-  {
     "name": "channels",
     "address": "/channels"
   },
@@ -27,6 +23,14 @@ export const Logged = [
   {
     "name": "saved",
     "address": "/saved"
+  },
+  {
+    "name": "iam",
+    "address": "/iam"
+  },
+  {
+    "name": "settings",
+    "address": "/accounts/settings"
   }
 ]
 

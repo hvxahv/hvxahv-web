@@ -1,6 +1,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
+import DeleteDevice from "../../components/devices/delete";
 
 const Settings: NextPage = () => {
     return (
@@ -13,6 +14,10 @@ const Settings: NextPage = () => {
 
             <main className={styles.main}>
 
+
+              <hr/>
+              <h2>Management Devices</h2>
+              <DeleteDevice />
             </main>
 
             <footer className={styles.footer}>
