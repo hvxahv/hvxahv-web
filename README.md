@@ -1,4 +1,8 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# hvxahv client web Implementation.
+
+## TODO-Transform the saved encryption method.
+
+In the current saved client, only the CID returned by IPFS is encrypted. The file will not be encrypted and saved. In the future, we will explore how the client can quickly encrypt files and upload them to IPFS.
 
 ## Getting Started
 
