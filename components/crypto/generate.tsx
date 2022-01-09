@@ -25,3 +25,14 @@ export const GenerateRSA = async () => {
     ["encrypt", "decrypt"]
   )
 }
+
+export const GenerateECDH = async () => {
+  return await window.crypto.subtle.generateKey(
+    {
+      name: "ECDH",
+      namedCurve: "P-256",
+    },
+    true,
+    ["deriveKey", "deriveBits"]
+  );
+}

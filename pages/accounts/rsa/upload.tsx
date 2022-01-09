@@ -5,6 +5,9 @@ import { useRouter } from "next/router";
 import {isHaveRSA, SaveRSA} from "../../../components/indexed/rsa";
 import { ImportPrivateKey, ImportPublicKey } from "../../../components/crypto/import";
 import {GetDevices} from "../../../components/devices/fetch";
+import {GenerateECDH} from "../../../components/crypto/generate";
+import {ExportPrivateJWK} from "../../../components/crypto/export";
+import {ab2str} from "../../../components/crypto/conversion";
 
 const Upload = () => {
   const router = useRouter()
@@ -22,7 +25,7 @@ const Upload = () => {
       redirect: 'follow'
     };
 
-    fetch("http://localhost:8088/api/v1/accounts/rsa/public", requestOptions)
+    fetch("http://localhost:8088/api/v1/account/rsa/public", requestOptions)
       .then(res => res.json())
       .then(res => {
         const reader = new FileReader()
@@ -69,21 +72,47 @@ const Upload = () => {
     })
   }, [router])
 
-  const handleRequestPrivate = (id: any) =>　{
+  const handleRequestPrivate = async (id: any) =>　{
+    const k = await GenerateECDH()
+    const privateJwk = await ExportPrivateJWK(k.privateKey)
+    const publicJwk = await ExportPrivateJWK(k.publicKey)
+
+    // Initialization Vector
+    const iv = await window.crypto.getRandomValues(new Uint8Array(12))
+
+    localStorage.setItem("dh_private_jwk", JSON.stringify(privateJwk))
+    localStorage.setItem("dh_public_jwk", JSON.stringify(publicJwk))
+    localStorage.setItem("dh_iv", window.btoa(ab2str(iv)))
+    
     const myHeaders = new Headers();
     myHeaders.append("Authorization", `Bearer ${token}`);
+    const localDeviceID = localStorage.getItem("hvxahv_device_hash")
+    if (localDeviceID == undefined) {
+      return
+    }
+
+    const formdata = new FormData()
+    console.log(id)
+    formdata.append("req_device_id", id)
+    formdata.append("device_id", localDeviceID);
+    formdata.append("jwk", JSON.stringify(publicJwk))
+    formdata.append("iv", window.btoa(ab2str(iv)))
 
     const requestOptions = {
-      method: 'GET',
+      method: 'POST',
       headers: myHeaders,
+      body: formdata,
       redirect: 'follow'
     };
 
     // @ts-ignore
-    fetch(`http://localhost:8088/api/v1/accounts/rsa/private?device_id=${id}`, requestOptions)
+    fetch("http://localhost:8088/api/v1/account/rsa/private/request", requestOptions)
       .then(res => res.json())
       .then(res => {
         console.log(res)
+        if (res.code == "200") {
+          router.push("/accounts/rsa/wait")
+        }
       })
       .catch(error => console.log('error', error));
   }
@@ -109,7 +138,7 @@ const Upload = () => {
                       ?
                     <p style={{ color: `blue` }}>Current Device</p>
                       :
-                    <button onClick={() => handleRequestPrivate(i.ID)}>Request</button>
+                    <button onClick={() => handleRequestPrivate(i.Hash)}>Request</button>
                     }
                     <hr/>
                   </div>

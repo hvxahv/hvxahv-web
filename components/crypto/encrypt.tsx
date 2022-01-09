@@ -4,15 +4,28 @@
 // It returns a Promise which will be fulfilled with the encrypted data (also known as "ciphertext").
 // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/encrypt
 export const EncryptData = async (publicKey: CryptoKey | undefined, data: ArrayBuffer) => {
-    if (publicKey == undefined) {
-      return
-    }
-    return await window.crypto.subtle.encrypt(
-      {
-        name: "RSA-OAEP"
-      },
-      publicKey,
-      data
-    )
+  if (publicKey == undefined) {
+    return
   }
-  
+  return await window.crypto.subtle.encrypt(
+    {
+      name: "RSA-OAEP"
+    },
+    publicKey,
+    data
+  )
+}
+
+export const EncryptDataByAES = async (key: CryptoKey | undefined, data: BufferSource, iv: Uint8Array) => {
+  if (key == undefined) {
+    return
+  }
+  return await window.crypto.subtle.encrypt(
+    {
+      name: "AES-GCM",
+      iv: iv,
+    },
+    key,
+    data
+  )
+}

@@ -10,7 +10,7 @@ export const GetDevices = async (token: string) => {
     redirect: 'follow'
   }
   // @ts-ignore
-  const res = await fetch("http://localhost:8088/api/v1/accounts/devices", requestOptions).then(res => {
+  const res = await fetch("http://localhost:8088/api/v1/account/devices", requestOptions).then(res => {
     return res.json()
   })
 

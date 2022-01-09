@@ -20,3 +20,19 @@ export const TextEncoding = (text: string) => {
   const enc = new TextEncoder();
   return enc.encode(text);
 }
+
+
+export const DecryptDataByAES = async (key: CryptoKey | undefined, data: BufferSource, iv: Uint8Array) => {
+  if (key == undefined) {
+    return
+  }
+
+  return await window.crypto.subtle.decrypt(
+    {
+      name: "AES-GCM",
+      iv: iv,
+    },
+    key,
+    data
+  )
+}

@@ -51,3 +51,35 @@ export const ImportPublicKey = async (publicPem: string | undefined) => {
     ["encrypt"]
   )
 }
+
+export const ImportPrivateJWK = async (privateWebKey: JsonWebKey | undefined) => {
+  if (privateWebKey == undefined) {
+    return
+  }
+  return await window.crypto.subtle.importKey(
+    "jwk",
+    privateWebKey,
+    {
+      name: "ECDH",
+      namedCurve: "P-256",
+    },
+    true,
+    ["deriveKey", "deriveBits"]
+  );
+}
+
+export const ImportPublicJWK = async (publicWebKey: JsonWebKey | undefined) => {
+  if (publicWebKey == undefined) {
+    return
+  }
+  return await window.crypto.subtle.importKey(
+    "jwk",
+    publicWebKey,
+    {
+      name: "ECDH",
+      namedCurve: "P-256",
+    },
+    true,
+    []
+  )
+}

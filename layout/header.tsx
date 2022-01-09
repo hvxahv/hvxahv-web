@@ -41,7 +41,6 @@ const Header = () => {
     localStorage.removeItem("hvxahv_login_token")
     localStorage.removeItem("hvxahv_device_vapid_publicKey")
     localStorage.removeItem("hvxahv_name")
-
     // DELETE LOGIN.
     const myHeaders = new Headers();
     myHeaders.append("Authorization", `Bearer ${token}`);
@@ -51,7 +50,7 @@ const Header = () => {
       redirect: 'follow'
     }
     // @ts-ignore
-    fetch("http://localhost:8088/api/v1/accounts/logout", requestOptions)
+    fetch("http://localhost:8088/api/v1/account/logout", requestOptions)
       .then(res => res.json())
       .then(res => {
         router.reload()

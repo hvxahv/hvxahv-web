@@ -23,7 +23,7 @@ const SignIn = () => {
     }
 
     // @ts-ignore
-    fetch(`${process.env.address}/accounts/signin`, requestOptions)
+    fetch(`${process.env.address}/account/signin`, requestOptions)
       .then(res => res.json())
       .then(res => {
         setMessage(res)

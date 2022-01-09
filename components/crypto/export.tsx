@@ -34,3 +34,23 @@ export const ExportPrivateKey = async (privateKey: CryptoKey | undefined) => {
   const b64 = window.btoa(ab2str(k))
   return `-----BEGIN PRIVATE KEY-----\n${b64}\n-----END PRIVATE KEY-----`
 }
+
+export const ExportPrivateJWK = async (privateKey: CryptoKey | undefined) => {
+  if (privateKey == undefined) {
+    return
+  }
+  return await window.crypto.subtle.exportKey(
+    "jwk",
+    privateKey as CryptoKey
+  )
+}
+
+export const ExportPublicJWK = async (publicKey: CryptoKey | undefined) => {
+  if (publicKey == undefined) {
+    return
+  }
+  return await window.crypto.subtle.exportKey(
+    "jwk",
+    publicKey as CryptoKey,
+  )
+}
