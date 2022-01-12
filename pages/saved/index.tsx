@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
-import { EncryptData } from "../../components/crypto/encrypt";
-import { GetRSA } from "../../components/indexed/rsa";
+import { EncryptData, encryptFile } from "../../components/crypto/encrypt";
+import { getRSA, GetRSA } from "../../components/indexed/rsa";
 import { create, Options } from 'ipfs-http-client';
 import { DecryptData, TextEncoding } from "../../components/crypto/decrypt";
 import { ab2str, str2ab } from "../../components/crypto/conversion";
@@ -21,13 +21,17 @@ const Saved: NextPage = () => {
 
   const router = useRouter()
   const [token, setToken] = useState("")
+  const [hvxahvName, setHvxahvName] = useState("")
+
   const ipfsAPI = "http://127.0.0.1:5001"
   useEffect(() => {
     const token = localStorage.getItem("hvxahv_login_token")
-    if (token == undefined) {
+    const n = localStorage.getItem("hvxahv_name")
+    if (token == undefined || n == undefined) {
       router.push("/accounts/sign_up")
       return
     }
+    setHvxahvName(n)
     setToken(token)
     GetSaves(token).then(r => {
       setSaves(r.saves)
@@ -40,20 +44,32 @@ const Saved: NextPage = () => {
   const upload = async (e: any) => {
     const name = e.target.files[0].name
     const type = e.target.files[0].type
+    const f = new Uint8Array(await e.target.files[0].arrayBuffer())
+    const encrypted = await encryptFile(hvxahvName, f)
+    if (encrypted == undefined) {
+      return
+    }
+    // @ts-ignore
+    const blob = new Blob([encrypted], {type: e.target.files[0].type})
+
     const client = create(ipfsAPI as Options)
-    const { path } = await client.add(e.target.files[0])
+    const { path } = await client.add(blob)
     console.log(path)
-    const hash = await encrypt(path)
-    console.log(name, type, hash)
-    post(name, type, hash)
+    // const hash = await encrypt(path)
+    // console.log(name, type, hash)
+    post(name, type, path)
 
   }
 
   const encrypt = async (hash: string) => {
-    const account = await GetRSA("hvturingga")
-    const res = await EncryptData(account.publicKey, TextEncoding(hash))
-    const x = ab2str(res)
-    return window.btoa(x)
+    // const k = await getRSA(hvxahvName)
+    // if (k == undefined) {
+    //   return
+    // }
+    
+    // const res = await EncryptData(k.public_key, TextEncoding(hash))
+    // const x = ab2str(res)
+    // return window.btoa(x)
   }
 
   const post = (name: string, type: string, hash: string) => {
@@ -97,29 +113,13 @@ const Saved: NextPage = () => {
         console.log(res.message.Name)
         console.log(res.message.FileType)
         console.log(res.message.Hash)
-        decrypt(res.message.Hash).then(r => {
-          const h = ab2str(r)
-
-          setHash(h)
-
-        })
+        
       })
       .catch(error => console.log('error', error));
   }
 
-  const decrypt = async (hash: string) => {
-    const account = await GetRSA("hvturingga")
-    const b = window.atob(hash)
-    const ab = str2ab(b)
-    return await DecryptData(account.privateKey, ab)
-  }
-
   const handleCheckFileByHash = (hash: string) => {
-    decrypt(hash).then(r => {
-      const h = ab2str(r)
-      console.log(h)
-      window.location.href=`http://localhost:8081/ipfs/${h}`
-    })
+    
   }
 
   return (
@@ -143,6 +143,7 @@ const Saved: NextPage = () => {
 
         <div>
           <input type="file" onChange={e => upload(e)} />
+          <input type="checkbox" /> <p>Encrypt</p>
         </div>
         <div>
           <h2>Get content by hash</h2>

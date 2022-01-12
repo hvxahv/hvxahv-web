@@ -1,3 +1,6 @@
+import { readPrivateKey, decrypt, readMessage } from 'openpgp';
+import { getRSA } from '../indexed/rsa';
+
 // https://datatracker.ietf.org/doc/html/rfc3447
 // The decrypt() method of the SubtleCrypto interface decrypts some encrypted data.
 // It takes as arguments a key to decrypt with, some optional extra parameters,
@@ -35,4 +38,35 @@ export const DecryptDataByAES = async (key: CryptoKey | undefined, data: BufferS
     key,
     data
   )
+}
+
+export const decryptFile = async (name: string, fileName: string, fileType: string, encrypted: any) => {
+  const k = await getRSA(name)
+  if (k == undefined) {
+    return
+  }
+  const privateKeyArmored = await readPrivateKey({ armoredKey: k.private_key })
+
+  const message = await readMessage({
+    armoredMessage: encrypted // parse armored message
+  });
+
+  const { data: decrypted } = await decrypt({
+    message,
+    config: {
+      allowInsecureDecryptionWithSigningKeys: true,
+    },
+    format: "binary",
+    decryptionKeys: privateKeyArmored
+  })
+  console.log(decrypted)
+
+  const a = document.createElement('a')
+  a.download = fileName
+  // @ts-ignore
+  const blob = new Blob([decrypted], {type: fileType})
+  a.href = window.URL.createObjectURL(blob)
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
 }

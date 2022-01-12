@@ -37,7 +37,7 @@ const SignUp = () => {
       redirect: 'follow'
     };
 
-    fetch(`${process.env.address}/accounts/signup`, requestOptions)
+    fetch(`${process.env.address}/account/signup`, requestOptions)
       .then(res => res.json())
       .then(res => {
         setMessage(res)

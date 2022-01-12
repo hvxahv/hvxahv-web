@@ -40,6 +40,10 @@ export const SaveRSA = async (account: string, private_pem: CryptoKey | undefine
 
 }
 
+export const getRSA = async (account: string) => {
+  return db.rsa.get(account);
+}
+
 export const GetRSA = async (account: string) => {
   const a = await db.rsa.get(account)
   const privateKey = await ImportPrivateKey(a?.private_key)
