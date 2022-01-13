@@ -20,7 +20,7 @@ const SignUp = () => {
       setMessage("USERNAME_ALREADY_EXISTS")
       return
     }
-    const k = await generateRSA()
+
     const rsa = await generateRSA()
     const x = saveRSA(username, rsa.privateKey, rsa.publicKey)
 
@@ -28,7 +28,7 @@ const SignUp = () => {
     data.append("mail", mail)
     data.append("username", username);
     data.append("password", password);
-    data.append("publicKey", k.publicKey as string)
+    data.append("publicKey", rsa.publicKey as string)
 
     const requestOptions: Request = {
       method: 'POST',

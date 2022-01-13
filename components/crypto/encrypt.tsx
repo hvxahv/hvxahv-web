@@ -1,5 +1,6 @@
-import { encrypt, createMessage, readMessage, readKey } from 'openpgp';
+import {encrypt, createMessage, readMessage, readKey, readPrivateKey, decrypt, generateKey} from 'openpgp';
 import { getRSA } from '../indexed/rsa';
+import {generateRSA} from "./generate";
 
 // https://datatracker.ietf.org/doc/html/rfc3447
 // It takes as its arguments a key to encrypt with,
@@ -34,19 +35,16 @@ export const EncryptDataByAES = async (key: CryptoKey | undefined, data: BufferS
 }
 
 export const encryptFile = async (name: string, files: Uint8Array) => {
-  const k = await getRSA(name)
-  if (k == undefined) {
+  const key = await getRSA(name)
+  if (key == undefined) {
     return
   }
-  const publicKeyArmored = await readKey({ armoredKey: k.public_key })
 
-  const encrypted = await encrypt({
-    message: await createMessage({binary: files}), // input as Message object
+  const publicKey = await readKey({ armoredKey: key.public_key });
+
+  return encrypt({
+    message: await createMessage({ binary: files }),
+    encryptionKeys: publicKey,
     format: 'binary',
-    encryptionKeys: publicKeyArmored,
-  })
-
-  return await readMessage({
-    binaryMessage: encrypted
   })
 }

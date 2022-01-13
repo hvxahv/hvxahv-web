@@ -5,7 +5,7 @@ import styles from '../../styles/Home.module.css'
 import { EncryptData, encryptFile } from "../../components/crypto/encrypt";
 import { getRSA, GetRSA } from "../../components/indexed/rsa";
 import { create, Options } from 'ipfs-http-client';
-import { DecryptData, TextEncoding } from "../../components/crypto/decrypt";
+import {DecryptData, decryptFile, TextEncoding} from "../../components/crypto/decrypt";
 import { ab2str, str2ab } from "../../components/crypto/conversion";
 import { useRouter } from "next/router";
 import {GetSaves} from "../../components/saved/fetch";
@@ -49,9 +49,10 @@ const Saved: NextPage = () => {
     if (encrypted == undefined) {
       return
     }
+    // const dec = await decryptFile("hvturingga", name, type, encrypted)
     // @ts-ignore
     const blob = new Blob([encrypted], {type: e.target.files[0].type})
-
+    console.log(blob)
     const client = create(ipfsAPI as Options)
     const { path } = await client.add(blob)
     console.log(path)
@@ -107,8 +108,23 @@ const Saved: NextPage = () => {
       .catch(error => console.log('error', error));
   }
 
-  const handleCheckFileByHash = (hash: string) => {
-    
+  const handleCheckFileByHash = async (hash: string, fileName: string, fileType: string) => {
+    console.log(hash)
+
+    const requestOptions = {
+      method: 'GET',
+      redirect: 'follow'
+    };
+
+    // @ts-ignore
+    const res = await fetch(`http://localhost:8081/ipfs/${hash}`, requestOptions)
+      .then(res => {
+        return res.blob()
+      })
+
+    const u8a = new Uint8Array(await res.arrayBuffer())
+    const dec = await decryptFile("hvturingga", fileName, fileType, u8a)
+    console.log(dec)
   }
 
   return (
@@ -124,7 +140,7 @@ const Saved: NextPage = () => {
           {saves && saves.map((i, idx) => {
             return (
               <ul key={idx}>
-                <li>{i.Name} - {i.FileType} - <button onClick={() => handleCheckFileByHash(i.Hash)}>CHECK</button></li>
+                <li>{i.Name} - {i.FileType} - <button onClick={() => handleCheckFileByHash(i.Hash, i.Name, i.FileType)}>DOWNLOAD</button></li>
               </ul>
             )
           })}
@@ -138,21 +154,6 @@ const Saved: NextPage = () => {
           <h2>Get content by hash</h2>
           <input type="text" name="hash" onChange={e => handleInputSavedID(e)} />
           <button onClick={() => handleGet()}>Get</button>
-        </div>
-        <div>
-          {hash && <div>
-            <code>{hash}</code>
-            <div>
-              Preview: →
-              <a href={`http://localhost:8081/ipfs/${hash}`}
-                target={`_blank`}
-                style={{ color: `blue` }}
-              >
-                GO...
-              </a>
-              ←
-            </div>
-          </div>}
         </div>
       </main>
 

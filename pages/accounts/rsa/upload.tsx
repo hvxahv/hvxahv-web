@@ -2,7 +2,7 @@ import Head from 'next/head'
 import React, {useEffect, useState} from "react";
 import GoBack from "../../../components/buttons/back";
 import { useRouter } from "next/router";
-import {isHaveRSA, SaveRSA} from "../../../components/indexed/rsa";
+import {isHaveRSA, saveRSA, SaveRSA} from "../../../components/indexed/rsa";
 import { ImportPrivateKey, ImportPublicKey } from "../../../components/crypto/import";
 import {GetDevices} from "../../../components/devices/fetch";
 import {GenerateECDH} from "../../../components/crypto/generate";
@@ -34,9 +34,8 @@ const Upload = () => {
           if (e.target == null) {
             return
           }
-          const privateKey = await ImportPrivateKey(e.target.result as string)
-          const publicKeyResult = await ImportPublicKey(res.public_key)
-          const a = await SaveRSA(hvxahvName, privateKey, publicKeyResult)
+          console.log(e.target.result)
+          const a = await saveRSA(hvxahvName, e.target.result as string, res.public_key)
           if (a != undefined) {
             router.reload()
           }

@@ -40,26 +40,25 @@ export const DecryptDataByAES = async (key: CryptoKey | undefined, data: BufferS
   )
 }
 
-export const decryptFile = async (name: string, fileName: string, fileType: string, encrypted: any) => {
-  const k = await getRSA(name)
-  if (k == undefined) {
+export const decryptFile = async (name: string, fileName: string, fileType: string, encrypted: Uint8Array) => {
+  const key = await getRSA(name)
+  if (key == undefined) {
     return
   }
-  const privateKeyArmored = await readPrivateKey({ armoredKey: k.private_key })
+
+  const privateKeyArmored = await readPrivateKey({ armoredKey: key.private_key })
 
   const message = await readMessage({
-    armoredMessage: encrypted // parse armored message
-  });
+    binaryMessage: encrypted
+  })
+
 
   const { data: decrypted } = await decrypt({
     message,
-    config: {
-      allowInsecureDecryptionWithSigningKeys: true,
-    },
     format: "binary",
+    config: { allowInsecureDecryptionWithSigningKeys: true },
     decryptionKeys: privateKeyArmored
   })
-  console.log(decrypted)
 
   const a = document.createElement('a')
   a.download = fileName

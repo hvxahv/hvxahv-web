@@ -40,7 +40,7 @@ const DeleteDevice = () => {
     };
 
     // @ts-ignore
-    fetch("http://localhost:8088/api/v1/accounts/devices/delete", requestOptions)
+    fetch("http://localhost:8088/api/v1/account/devices/delete", requestOptions)
       .then(res => res.json())
       .then(res => {
         router.reload()
