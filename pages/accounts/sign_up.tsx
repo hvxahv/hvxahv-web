@@ -2,8 +2,8 @@ import Head from 'next/head'
 import React, { useState } from "react";
 import GoBack from "../../components/buttons/back";
 import { useRouter } from "next/router";
-import { GenerateRSA } from "../../components/crypto/generate";
-import { SaveRSA, GetRSA } from "../../components/indexed/rsa";
+import { generateRSA, GenerateRSA } from "../../components/crypto/generate";
+import { SaveRSA, GetRSA, saveRSA, getRSA } from "../../components/indexed/rsa";
 import { ExportPublicKey } from "../../components/crypto/export";
 
 const SignUp = () => {
@@ -14,21 +14,21 @@ const SignUp = () => {
   const [message, setMessage] = useState({})
 
   const handleRegistered = async () => {
-    const account = await GetRSA(username)
+    const account = await getRSA(username)
 
-    if (account.publicKey != undefined || account.privateKey != undefined) {
+    if (account != undefined) {
       setMessage("USERNAME_ALREADY_EXISTS")
       return
     }
-    const k = await GenerateRSA()
-    const c = await SaveRSA(username, k.privateKey, k.publicKey)
-    const privateKey = await ExportPublicKey(k.publicKey)
+    const k = await generateRSA()
+    const rsa = await generateRSA()
+    const x = saveRSA(username, rsa.privateKey, rsa.publicKey)
 
     const data = new FormData();
     data.append("mail", mail)
     data.append("username", username);
     data.append("password", password);
-    data.append("publicKey", privateKey as string)
+    data.append("publicKey", k.publicKey as string)
 
     const requestOptions: Request = {
       method: 'POST',

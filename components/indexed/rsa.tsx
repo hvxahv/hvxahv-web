@@ -67,6 +67,20 @@ export const DeleteRSA = async (account: string) => {
 }
 
 export const isHaveRSA = async (account: string) => {
-  const a = await GetRSA(account)
-  return !(a.publicKey == undefined || a.privateKey == undefined)
+  const a = await getRSA(account)
+  return !(a == undefined)
+}
+
+export const saveRSA = async (account: string, private_key: string, public_key: string) => {
+  const a = await getRSA(account)
+  if (a != undefined) {
+    return
+  }
+
+  return db.rsa.add({
+    account,
+    private_key,
+    public_key
+  })
+
 }

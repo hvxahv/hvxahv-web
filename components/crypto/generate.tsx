@@ -1,3 +1,5 @@
+import { generateKey } from 'openpgp';
+
 // TODO - https://developer.mozilla.org/zh-CN/docs/Web/API/SubtleCrypto
 // Storing keys
 // CryptoKey objects can be stored using the structured clone algorithm,
@@ -35,4 +37,15 @@ export const GenerateECDH = async () => {
     true,
     ["deriveKey", "deriveBits"]
   );
+}
+
+
+export const generateRSA = async () => {
+  const { privateKey, publicKey } = await generateKey({
+      type: 'rsa', // Type of the key
+      rsaBits: 4096, // RSA key size (defaults to 4096 bits)
+      userIDs: [{ name: 'Jon Smith', email: 'jon@example.com' }], // you can pass multiple user IDs
+      passphrase: 'super long and hard to guess secret' // protects the private key
+  })
+  return {privateKey, publicKey}
 }

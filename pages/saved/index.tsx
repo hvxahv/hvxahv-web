@@ -61,17 +61,6 @@ const Saved: NextPage = () => {
 
   }
 
-  const encrypt = async (hash: string) => {
-    // const k = await getRSA(hvxahvName)
-    // if (k == undefined) {
-    //   return
-    // }
-    
-    // const res = await EncryptData(k.public_key, TextEncoding(hash))
-    // const x = ab2str(res)
-    // return window.btoa(x)
-  }
-
   const post = (name: string, type: string, hash: string) => {
     const myHeaders = new Headers();
     myHeaders.append("Authorization", `Bearer ${token}`);
