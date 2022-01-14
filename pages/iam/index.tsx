@@ -2,10 +2,29 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
 import Notifications from "../../components/notification";
-import React from "react";
+import React, {useEffect, useState} from "react";
 
 const IAM: NextPage = () => {
+  const [actor, setActor] = useState<any>({})
+  useEffect(() => {
+    (async () => {
+      const token = localStorage.getItem("hvxahv_login_token")
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", `Bearer ${token}`);
 
+      const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow'
+      }
+
+      // @ts-ignore
+      const res = await fetch("http://localhost:8088/api/v1/account/iam", requestOptions)
+      const json = await res.json()
+      setActor(json.actor)
+    })()
+  }, [])
+  console.log(actor)
   return (
     <div className={styles.container}>
       <Head>
@@ -16,6 +35,16 @@ const IAM: NextPage = () => {
 
       <main className={styles.main}>
         <Notifications/>
+        {actor && <div>
+          <p>{actor.Name}</p>
+          <span>{actor.PreferredUsername}</span>
+          <p>{actor.Summary}</p>
+          <p>{actor.Inbox}</p>
+          <p>{actor.Url}</p>
+          <p>{actor.ActorType}</p>
+          <p>{actor.Domain}</p>
+          <img src={actor.Avatar} alt="" style={{ width: `10rem`, height: `10rem`}}/>
+        </div>}
       </main>
 
       <footer className={styles.footer}>
