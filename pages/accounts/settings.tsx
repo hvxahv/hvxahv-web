@@ -2,7 +2,6 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
 import DeleteDevice from "../../components/devices/delete";
-import Avatar from "../../components/settings/avatar";
 import AvatarUploader from "../../components/settings/avatar";
 
 const Settings: NextPage = () => {
