@@ -25,6 +25,10 @@ export const Logged = [
     "address": "/saved"
   },
   {
+    "name": "messages",
+    "address": "/messages"
+  },
+  {
     "name": "iam",
     "address": "/iam"
   },
