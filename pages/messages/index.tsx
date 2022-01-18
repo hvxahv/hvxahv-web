@@ -1,9 +1,15 @@
-import type { NextPage } from 'next'
+import type {NextPage} from 'next'
 import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
-import {Key, ReactChild, ReactFragment, ReactPortal, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {useRouter} from "next/router";
-import sdk from 'matrix-js-sdk';
+import {createClient} from "../../components/matrix/client";
+import { Room } from "matrix-js-sdk/src/models/room";
+import {func} from "prop-types";
+// Data structures
+var roomList = [];
+var viewingRoom = null;
+var numMessagesToShow = 20;
 
 const Messages: NextPage = () => {
   const route = useRouter()
@@ -51,36 +57,38 @@ const Messages: NextPage = () => {
   }, [homeServer, route, token, userID])
 
   const [roomTimeline, setRoomTimeline] = useState<any>([])
+  const [joinedRooms, setJoinedRooms] = useState<any>([])
   useEffect(() => {
     if (token != "") {
       (async () => {
-        const client = sdk.createClient({
-          baseUrl: "http://localhost:8008",
-          accessToken: token,
-          userId: userID
+        const client = await createClient(token, userID)
+
+        client.on("Room", function (e) {
+          setJoinedRooms((r: any) => [...r, e]);
         })
-        await client.startClient({
-          pollTimeout: 3000,
+        client.on("Room.timeline", function(event, room, toStartOfTimeline) {
+          if (toStartOfTimeline) {
+            return; // don't print paginated results
+          }
+          if (event.getType() !== "m.room.message") {
+            return; // only print messages
+          }
+          // console.log(room)
+          console.log(
+            // the room name will update with m.room.name events automatically
+            "(%s) %s :: %s", room.name, event.getSender(), event.getContent().body
+          )
+          setRoomTimeline((r: any) => [...r, room])
+          console.log(event.getContent())
+          // console.log(event.getSender())
+          // console.log(room)
+          // console.log(room.name)
         })
-
-        client.once('sync', function (state, prevState, res) {
-          console.log(state); // state will be 'PREPARED' when the client is ready to use
-        });
-
-        client.on("Room.timeline", function (event, room, toStartOfTimeline) {
-          setRoomTimeline((oldArray: any) => [...oldArray, event.event]);
-        });
-
-
-        const rooms = client.getRooms();
-        rooms.forEach(room => {
-          room.timeline.forEach(t => {
-            console.log(JSON.stringify(t.event.content));
-          });
-        });
       })()
     }
   }, [homeServer, token, userID])
+
+  console.log(joinedRooms)
   console.log(roomTimeline)
   return (
     <div className={styles.container}>
@@ -91,20 +99,25 @@ const Messages: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        {roomTimeline && roomTimeline.reverse().map((i: any, idx: any) => {
+
+        <h1>ROOM LIST</h1>
+        {joinedRooms && joinedRooms.map((i: any, idx: any) => {
           return (
             <div key={idx}>
-              <div>Room ID: {i.room_id}</div>
-              <div>Sender: {i.sender}</div>
-              <div>Content: {i.content.displayname} - {i.content.displayname}</div>
-              <div>Creator: {i.content.creator}</div>
-              <div>body: {i.content.body}</div>
-              <div>Content Sender: {i.content.sender}</div>
-              <div>Type: {i.content.type}</div>
-              <hr/>
+              <div>{i.name != "Empty room" ? <div>ROOM: {i.name} - ROOM ID: {i.roomId}</div> : null}</div>
             </div>
           )
         })}
+        <hr/>
+        <h1>Messages</h1>
+        {/*{roomTimeline && roomTimeline.reverse().map((i: any, idx: any) => {*/}
+        {/*  return (*/}
+        {/*    <div key={idx}>*/}
+        {/*      <div>{i}</div>*/}
+        {/*      <hr/>*/}
+        {/*    </div>*/}
+        {/*  )*/}
+        {/*})}*/}
       </main>
 
       <footer className={styles.footer}>

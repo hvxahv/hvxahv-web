@@ -3,7 +3,7 @@ import {DeriveDHKey} from "../../../components/crypto/derive";
 import {ImportPrivateJWK, ImportPrivateKey, ImportPublicJWK, ImportPublicKey} from "../../../components/crypto/import";
 import {str2ab} from "../../../components/crypto/conversion";
 import {DecryptDataByAES} from "../../../components/crypto/decrypt";
-import {SaveRSA} from "../../../components/indexed/rsa";
+import {saveRSA, SaveRSA} from "../../../components/indexed/rsa";
 import {useRouter} from "next/router";
 
 function stringToUint8Array(str: string){
@@ -59,8 +59,9 @@ const WaitHDKey = () => {
           if (k == undefined) {
             return
           }
-          const pub = await getPub(xxs.actor_public_key)
-          const save = await SaveRSA(n, k, pub)
+
+          // const pub = await getPub(xxs.public_key)
+          const save = await saveRSA(n, k, xxs.public_key)
           console.log(save)
           if (save == undefined) {
             return
@@ -84,6 +85,7 @@ const WaitHDKey = () => {
   const handler = async (res: any, localPrivateJWK: string, remotePublicJWK: string, remotePrivateKey: string) => {
     const remotePublicKey = await ImportPublicJWK(JSON.parse(remotePublicJWK))
     const localPrivateKey = await ImportPrivateJWK(JSON.parse(localPrivateJWK))
+
     const derive = await DeriveDHKey(remotePublicKey, localPrivateKey)
     const string = window.atob(remotePrivateKey)
     const uintArray = str2ab(string)
@@ -94,7 +96,8 @@ const WaitHDKey = () => {
     const ivs = stringToUint8Array(iv)
     const r = await DecryptDataByAES(derive, uintArray, ivs)
     const b = new TextDecoder().decode(r);
-    return await ImportPrivateJWK(JSON.parse(b))
+    return b
+    // return await ImportPrivateJWK(JSON.parse(b))
   }
 
 

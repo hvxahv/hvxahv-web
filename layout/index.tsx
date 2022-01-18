@@ -4,7 +4,7 @@ const Layout = ({children}: any) => {
     return (
         <>
           <Header />
-          <div style={{ margin: `1rem`}}>
+          <div>
             {children}
           </div>
           <footer>
