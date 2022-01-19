@@ -17,8 +17,9 @@ const Settings: NextPage = () => {
 
 
               <hr/>
-              <h2>Management Devices</h2>
+              <h2>Upload Avatar</h2>
               <AvatarUploader />
+              <h2>Management Devices</h2>
               <DeleteDevice />
             </main>
 

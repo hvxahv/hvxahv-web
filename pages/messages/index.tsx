@@ -4,12 +4,6 @@ import styles from '../../styles/Home.module.css'
 import {useEffect, useState} from "react";
 import {useRouter} from "next/router";
 import {createClient} from "../../components/matrix/client";
-import { Room } from "matrix-js-sdk/src/models/room";
-import {func} from "prop-types";
-// Data structures
-var roomList = [];
-var viewingRoom = null;
-var numMessagesToShow = 20;
 
 const Messages: NextPage = () => {
   const route = useRouter()
@@ -21,7 +15,9 @@ const Messages: NextPage = () => {
     const matrixUserId = localStorage.getItem("hvxahv_matrix_userid")
     const matrixHomeServer = localStorage.getItem("hvxahv_matrix_server")
 
-    if (matrixToken == null || matrixUserId == null || matrixHomeServer == null) {
+    if (matrixToken == "undefined" || matrixUserId == "undefined" ||
+      matrixHomeServer == "undefined" || matrixToken == null ||
+      matrixUserId == null || matrixHomeServer == null) {
       const token = localStorage.getItem("hvxahv_login_token")
       const myHeaders = new Headers();
       myHeaders.append("Authorization", `Bearer ${token}`);
@@ -41,6 +37,7 @@ const Messages: NextPage = () => {
             route.push("/messages/register").then(() => {
             })
           }
+          console.log(res.matrix.Token)
           localStorage.setItem("hvxahv_matrix_token", res.matrix.Token)
           localStorage.setItem("hvxahv_matrix_userid", res.matrix.UserId)
           localStorage.setItem("hvxahv_matrix_server", res.matrix.HomeServer)
@@ -63,9 +60,25 @@ const Messages: NextPage = () => {
       (async () => {
         const client = await createClient(token, userID)
 
-        client.on("Room", function (e) {
-          setJoinedRooms((r: any) => [...r, e]);
+        client.once('sync', async function (state, prevState, res) {
+          if (state === 'PREPARED') {
+            const rooms = await client.getJoinedRooms();
+            // console.log(rooms)
+            rooms.joined_rooms.map((i, idx) => {
+              const room = client.getRoom(i)
+              setJoinedRooms((r: any) => [...r, room]);
+            })
+          }
         })
+
+        client.on("RoomMember.membership", function(event, member) {
+          if (member.membership === "invite" && member.userId === userID) {
+            client.joinRoom(member.roomId).then(function() {
+              console.log("Auto-joined %s", member.roomId);
+            });
+          }
+        })
+
         client.on("Room.timeline", function(event, room, toStartOfTimeline) {
           if (toStartOfTimeline) {
             return; // don't print paginated results
@@ -78,18 +91,31 @@ const Messages: NextPage = () => {
             // the room name will update with m.room.name events automatically
             "(%s) %s :: %s", room.name, event.getSender(), event.getContent().body
           )
-          setRoomTimeline((r: any) => [...r, room])
-          console.log(event.getContent())
-          // console.log(event.getSender())
-          // console.log(room)
-          // console.log(room.name)
+          setRoomTimeline((r: any) => [...r, `Contact:${room.name}, Sender:${event.getSender()}, Message:${event.getContent().body}`])
+
+
         })
+
+
+
       })()
     }
   }, [homeServer, token, userID])
 
-  console.log(joinedRooms)
-  console.log(roomTimeline)
+  const [message, setMessage] = useState("")
+
+  const send = async (roomId: string) => {
+    const client = await createClient(token, userID)
+    const content = {
+      "body": message,
+      "msgtype": "m.text"
+    };
+    await client.sendEvent(roomId, "m.room.message", content, "", (err, res) => {
+      console.log(err);
+    });
+  }
+  // console.log(joinedRooms)
+  // console.log(roomTimeline)
   return (
     <div className={styles.container}>
       <Head>
@@ -100,24 +126,26 @@ const Messages: NextPage = () => {
 
       <main className={styles.main}>
 
-        <h1>ROOM LIST</h1>
+        <h1>Messages</h1>
         {joinedRooms && joinedRooms.map((i: any, idx: any) => {
           return (
             <div key={idx}>
-              <div>{i.name != "Empty room" ? <div>ROOM: {i.name} - ROOM ID: {i.roomId}</div> : null}</div>
+              <div>{i.name != "Empty room" ? <div>{i.name}</div> : null} </div>
+              <input type="text" onChange={e => setMessage(e.target.value)}/>
+              <button onClick={() => send(i.roomId)}>Send</button>
             </div>
           )
         })}
         <hr/>
-        <h1>Messages</h1>
-        {/*{roomTimeline && roomTimeline.reverse().map((i: any, idx: any) => {*/}
-        {/*  return (*/}
-        {/*    <div key={idx}>*/}
-        {/*      <div>{i}</div>*/}
-        {/*      <hr/>*/}
-        {/*    </div>*/}
-        {/*  )*/}
-        {/*})}*/}
+        <h1>Chat</h1>
+        {roomTimeline && roomTimeline.map((i: any, idx: any) => {
+          return (
+            <div key={idx}>
+              <div>{i}</div>
+              <hr/>
+            </div>
+          )
+        })}
       </main>
 
       <footer className={styles.footer}>

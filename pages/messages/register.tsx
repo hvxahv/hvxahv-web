@@ -1,12 +1,39 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {useRouter} from "next/router";
 
 const MessagesRegister: NextPage = () => {
   const [password, setPassword] = useState("")
   const route = useRouter()
+
+  const handleRegisterMatrixAccess = () => {
+    const token = localStorage.getItem("hvxahv_login_token")
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", `Bearer ${token}`);
+
+    const formdata = new FormData();
+    formdata.append("password", password);
+
+    const requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: formdata,
+      redirect: 'follow'
+    };
+
+    // @ts-ignore
+    fetch("http://localhost:8088/api/v1/message/access", requestOptions)
+      .then(res => res.json())
+      .then(res => {
+        console.log(res)
+        if (res.code == "200") {
+          route.push("/messages").then(() => {})
+        }
+      })
+      .catch(error => console.log('error', error));
+  }
 
   console.log(password)
   return (
@@ -20,6 +47,7 @@ const MessagesRegister: NextPage = () => {
       <main className={styles.main}>
         <h1>PLEASE ENTER YOUR PASSWORD.</h1>
         <input type="password" onChange={e => setPassword(e.target.value)}/>
+        <button onClick={() => handleRegisterMatrixAccess()}>Start</button>
       </main>
 
       <footer className={styles.footer}>
