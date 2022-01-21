@@ -3,6 +3,7 @@ import Head from 'next/head'
 import styles from '../../styles/Home.module.css'
 import Notifications from "../../components/notification";
 import React, {useEffect, useState} from "react";
+import Image from 'next/image'
 
 const IAM: NextPage = () => {
   const [actor, setActor] = useState<any>({})
@@ -43,7 +44,10 @@ const IAM: NextPage = () => {
           <p>{actor.Url}</p>
           <p>{actor.ActorType}</p>
           <p>{actor.Domain}</p>
-          <img src={actor.Avatar} alt="" style={{ width: `10rem`, height: `10rem`}}/>
+          <Image src={actor.Avatar}
+                 alt="Avatar"
+                 width={500}
+                 height={500}/>
         </div>}
       </main>
 
